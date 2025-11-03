@@ -1,3 +1,8 @@
+
+
+# Unregister endpoint for deleting a participant from an activity
+from fastapi import Query
+
 """
 High School Management System API
 
@@ -6,6 +11,19 @@ for extracurricular activities at Mergington High School.
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
+import os
+from pathlib import Path
+
+"""
+High School Management System API
+
+A super simple FastAPI application that allows students to view and sign up
+for extracurricular activities at Mergington High School.
+"""
+
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
@@ -21,43 +39,43 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
 
 # In-memory activity database
 activities = {
-
-    "Soccer Team": {
-        "description": "Join the school soccer team and compete in local leagues",
-        "schedule": "Wednesdays and Fridays, 4:00 PM - 5:30 PM",
-        "max_participants": 18,
-        "participants": ["lucas@mergington.edu", "mia@mergington.edu"]
-    },
-    "Basketball Club": {
-        "description": "Practice basketball skills and play friendly matches",
-        "schedule": "Tuesdays and Thursdays, 5:00 PM - 6:30 PM",
+    "Basketball Team": {
+        "description": "Join the school basketball team for training and competitions",
+        "schedule": "Mondays and Thursdays, 4:00 PM - 6:00 PM",
         "max_participants": 15,
         "participants": ["liam@mergington.edu", "ava@mergington.edu"]
     },
-    "Drama Club": {
-        "description": "Participate in theater productions and acting workshops",
-        "schedule": "Mondays, 3:30 PM - 5:00 PM",
-        "max_participants": 20,
-        "participants": ["ella@mergington.edu", "jack@mergington.edu"]
+    "Soccer Club": {
+        "description": "Practice soccer skills and play friendly matches",
+        "schedule": "Wednesdays, 3:30 PM - 5:30 PM",
+        "max_participants": 18,
+        "participants": ["noah@mergington.edu", "mia@mergington.edu"]
     },
-    "Art Workshop": {
+    "Art Club": {
         "description": "Explore painting, drawing, and other visual arts",
-        "schedule": "Thursdays, 4:00 PM - 5:30 PM",
-        "max_participants": 16,
-        "participants": ["grace@mergington.edu", "noah@mergington.edu"]
+        "schedule": "Tuesdays, 3:30 PM - 5:00 PM",
+        "max_participants": 20,
+        "participants": ["isabella@mergington.edu", "lucas@mergington.edu"]
     },
-    "Debate Team": {
-        "description": "Develop public speaking and argumentation skills",
-        "schedule": "Wednesdays, 3:30 PM - 5:00 PM",
+    "Drama Society": {
+        "description": "Participate in acting, stage production, and theater performances",
+        "schedule": "Fridays, 4:00 PM - 6:00 PM",
+        "max_participants": 25,
+        "participants": ["amelia@mergington.edu", "jack@mergington.edu"]
+    },
+    "Math Olympiad": {
+        "description": "Prepare for math competitions and solve challenging problems",
+        "schedule": "Thursdays, 3:30 PM - 5:00 PM",
         "max_participants": 10,
-        "participants": ["chloe@mergington.edu", "ben@mergington.edu"]
+        "participants": ["ethan@mergington.edu", "charlotte@mergington.edu"]
     },
-    "Science Club": {
-        "description": "Conduct experiments and explore scientific concepts",
-        "schedule": "Fridays, 4:00 PM - 5:30 PM",
-        "max_participants": 14,
-        "participants": ["zoe@mergington.edu", "ethan@mergington.edu"]
+    "Debate Club": {
+        "description": "Develop public speaking and argumentation skills",
+        "schedule": "Wednesdays, 4:00 PM - 5:30 PM",
+        "max_participants": 16,
+        "participants": ["benjamin@mergington.edu", "harper@mergington.edu"]
     },
+    
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
@@ -77,6 +95,17 @@ activities = {
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
     }
 }
+
+@app.delete("/activities/{activity_name}/unregister")
+def unregister_from_activity(activity_name: str, email: str = Query(...)):
+    """Unregister a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    activity = activities[activity_name]
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=404, detail="Participant not found")
+    activity["participants"].remove(email)
+    return {"message": f"Unregistered {email} from {activity_name}"}
 
 
 @app.get("/")
@@ -107,3 +136,15 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+# Unregister endpoint for deleting a participant from an activity
+@app.delete("/activities/{activity_name}/unregister")
+def unregister_from_activity(activity_name: str, email: str = Query(...)):
+    """Unregister a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    activity = activities[activity_name]
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=404, detail="Participant not found")
+    activity["participants"].remove(email)
+    return {"message": f"Unregistered {email} from {activity_name}"}
